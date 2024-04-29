@@ -122,7 +122,8 @@ def main(args):
     #PERSON_CLASSES = ['guy', 'girl', 'child', 'boy', 'kid', 'lady', 'man', 'men', 'people', 'person', 'player', 'woman',
      #                   'eye', 'ear', 'face', 'head', 'hair','mouth', 'neck', 'nose', 'arm']
     
-    BREEDS_CLASSES = ['animal','bag','bird','bus','car','cap','chair','elephant','wheel','window', 'dog', 'vehicle', 'phone']
+    BREEDS_CLASSES = ['animal','bag','bird', 'bear', 'cow', 'giraffe', 'horse', 'sheep',
+                       'bus','car','cap','chair','elephant','wheel','window', 'dog', 'vehicle', 'phone']
 
     verified_classes = ['bird', 'cat', 'dog', 'elephant', 'giraffe', 'boat', 'bus', 'car', 'train', 
                         'truck', 'bottle', 'chair', 'clock', 'laptop', 'phone', 'tie', 'wheel']
