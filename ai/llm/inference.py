@@ -3,15 +3,20 @@ from langchain.chains import LLMChain
 from langchain_community.llms import LlamaCpp 
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+import argparse
 import re
 
 metadata_extraction_template_2 = """
 Given the following Actual Text, extract the title, authors, abstract and research domain. 
 and do not say anything else.
 
-answer format = {{'Title' : , 'authors' : , 'abstract': , 'research domain' : }}
 Actual Text: {text}
 """
+
+def get_args_parser():
+    parser = argparse.ArgumentParser('Set transformer detector', add_help=False)
+    parser.add_argument('--model_path', type=str, default='./models/llama-2-7b-chat.Q2_K.gguf',
+                        help="Path of the test image")
 
 def writing_file_pattern():
     with open('expr_pattern.txt', 'w', encoding='utf-8') as f:

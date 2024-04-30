@@ -73,7 +73,6 @@ def class_post_processing(probas_sub, probas_obj, probas, keep_queries, sub_bbox
         print(vg_sub, REL_CLASSES[probas[idx].argmax()], vg_obj)
 
 
-
 def get_args_parser():
     parser = argparse.ArgumentParser('Set transformer detector', add_help=False)
     parser.add_argument('--lr_backbone', default=1e-5, type=float)
@@ -162,7 +161,6 @@ def main(args):
     #CLASSES[probas_sub[idx].argmax()]
     #REL_CLASSES[probas[idx].argmax()]
     #CLASSES[probas_obj[idx].argmax()]
-
 
     model, _, _ = build_model(args)
     ckpt = torch.load(args.resume)
