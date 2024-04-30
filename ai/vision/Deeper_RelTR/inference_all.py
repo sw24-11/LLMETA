@@ -227,7 +227,6 @@ def main(args):
         class_post_processing(probas_sub=probas_sub, probas_obj=probas_obj, probas=probas, keep_queries=keep_queries,
                               sub_bboxes_scaled=sub_bboxes_scaled, obj_bboxes_scaled=obj_bboxes_scaled, indices=indices, im=im)
         
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('RelTR inference', parents=[get_args_parser()])
     args = parser.parse_args()
