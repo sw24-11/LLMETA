@@ -13,6 +13,112 @@ from second_classification.resnet import NonCommon_processing_Resnet
 from second_classification.person_processing import person_processing
 from models import build_model
 
+import tkinter as tk
+from tkinter import Canvas
+from PIL import Image, ImageTk
+import torch
+
+def tensor_to_tuple(tensor_box):
+    """Convert a tensor or tuple of tensors to a flattened tuple of integers."""
+    if isinstance(tensor_box, torch.Tensor):
+        # If it's a single tensor, check if it needs to be itemized or converted to a list.
+        return tuple(map(int, tensor_box.tolist())) if tensor_box.numel() > 1 else (int(tensor_box.item()),)
+    elif isinstance(tensor_box, tuple):
+        # Recursively flatten and convert elements, avoid creating nested tuples.
+        return tuple(sub_item for item in tensor_box for sub_item in (tensor_to_tuple(item) if isinstance(item, (tuple, torch.Tensor)) else (item,)))
+    elif isinstance(tensor_box, float):
+        # Directly convert float to tuple.
+        return (int(tensor_box),)
+    return tensor_box
+
+
+def parse_boxes_relations(data_dict):
+    boxes = {}
+    relations = {}
+    for key, value in data_dict.items():
+        if isinstance(key, tuple) and all(isinstance(item, (torch.Tensor, tuple)) for item in key):
+            sub, obj = map(tensor_to_tuple, key)
+            relations[(sub, obj)] = value
+        else:
+            box = tensor_to_tuple(key)
+            boxes[box] = value
+    return boxes, relations
+
+def create_iou(box1, box2):
+    """Calculate the Intersection over Union of two bounding boxes given as flat tuples."""
+    x_left = max(box1[0], box2[0])
+    y_top = max(box1[1], box2[1])
+    x_right = min(box1[2], box2[2])
+    y_bottom = min(box1[3], box2[3])
+
+    if x_right < x_left or y_bottom < y_top:
+        return 0.0
+
+    intersection_area = (x_right - x_left) * (y_bottom - y_top)
+    box1_area = (box1[2] - box1[0]) * (box1[3] - box1[1])
+    box2_area = (box2[2] - box2[0]) * (box2[3] - box2[1])
+
+    return intersection_area / (box1_area + box2_area - intersection_area)
+
+def run_image_box_selector(data_dict):
+    root = tk.Tk()
+    root.title("Image Box Selector")
+
+    image = Image.open("demo/3.jpg")
+    photo = ImageTk.PhotoImage(image)
+    canvas = Canvas(root, width=image.width, height=image.height)
+    canvas.pack()
+    canvas.create_image(0, 0, anchor="nw", image=photo)
+
+    boxes, relations = parse_boxes_relations(data_dict)
+
+    # Draw predefined boxes
+    for box in boxes:
+        canvas.create_rectangle(box, outline='green', width=2, tags="predefined")
+
+    rect = None
+    start_x, start_y = 0, 0
+
+    def on_button_press(event):
+        nonlocal start_x, start_y, rect
+        start_x, start_y = event.x, event.y
+        rect = canvas.create_rectangle(start_x, start_y, start_x, start_y, outline='red', width=2)
+
+    def on_move(event):
+        nonlocal rect
+        canvas.coords(rect, start_x, start_y, event.x, event.y)
+
+    def on_button_release(event):
+        nonlocal rect
+        end_x, end_y = event.x, event.y
+        canvas.coords(rect, start_x, start_y, end_x, end_y)
+        user_box = (start_x, start_y, end_x, end_y)
+
+        # Calculate IoU with all predefined boxes and find the best match
+        highest_iou = 0
+        best_match = None
+        for box in boxes:
+            iou = create_iou(user_box, box)
+            if iou > highest_iou:
+                highest_iou = iou
+                best_match = box
+
+        if best_match:
+            print("Best match box:", best_match, "with IoU of", highest_iou)
+            print("Class:", boxes[best_match])
+            # Highlight related boxes
+            for (sub, obj), relation in relations.items():
+                if best_match in (sub, obj):
+                    other_box = sub if best_match == obj else obj
+                    canvas.create_rectangle(other_box, outline='blue', width=2)
+                    print("Relation:", relation, "with box:", boxes[other_box])
+
+    canvas.bind("<Button-1>", on_button_press)
+    canvas.bind("<B1-Motion>", on_move)
+    canvas.bind("<ButtonRelease-1>", on_button_release)
+
+    root.mainloop()
+
 def calculate_iou(box1, box2):
     """Calculate Intersection over Union (IoU) between two bounding boxes."""
     x1, y1, x2, y2 = box1
@@ -42,6 +148,7 @@ def get_processed_class(explored_boxes, new_box, threshold=0.8):
 
 def class_post_processing(probas_sub, probas_obj, probas, keep_queries, sub_bboxes_scaled, obj_bboxes_scaled, indices, im):
     graph_triplet = []
+    triplet_dict = {}
     explored_boxes = {}
     for idx, (sxmin, symin, sxmax, symax), (oxmin, oymin, oxmax, oymax) in \
         zip(keep_queries, sub_bboxes_scaled[indices], obj_bboxes_scaled[indices]):
@@ -71,8 +178,11 @@ def class_post_processing(probas_sub, probas_obj, probas, keep_queries, sub_bbox
             explored_boxes[obj_tuple] = vg_obj
         else:
             vg_obj = processed_obj_class
-        print(vg_sub, REL_CLASSES[probas[idx].argmax()], vg_obj)
-
+        #print(vg_sub, REL_CLASSES[probas[idx].argmax()], vg_obj)
+        triplet_dict[sub_tuple] = vg_sub
+        triplet_dict[obj_tuple] = vg_obj
+        triplet_dict[((sxmin, symin, sxmax, symax), (oxmin, oymin, oxmax, oymax))] = REL_CLASSES[probas[idx].argmax()]
+    return triplet_dict
 
 def get_args_parser():
     parser = argparse.ArgumentParser('Set transformer detector', add_help=False)
@@ -224,8 +334,9 @@ def main(args):
         h, w = conv_features['0'].tensors.shape[-2:]
         im_w, im_h = im.size
 
-        class_post_processing(probas_sub=probas_sub, probas_obj=probas_obj, probas=probas, keep_queries=keep_queries,
+        triplet_dict = class_post_processing(probas_sub=probas_sub, probas_obj=probas_obj, probas=probas, keep_queries=keep_queries,
                               sub_bboxes_scaled=sub_bboxes_scaled, obj_bboxes_scaled=obj_bboxes_scaled, indices=indices, im=im)
+        run_image_box_selector(triplet_dict)
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('RelTR inference', parents=[get_args_parser()])
