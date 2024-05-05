@@ -11,6 +11,8 @@ import torch
 import torchvision.transforms as T
 from second_classification.resnet import NonCommon_processing_Resnet
 from second_classification.person_processing import person_processing
+from transformers import BlipProcessor, BlipForConditionalGeneration
+from second_classification.blip import open_vocabulary_classification_blip
 from models import build_model
 
 def calculate_iou(box1, box2):
@@ -139,7 +141,8 @@ def get_args_parser():
 
 
 def main(args):
-
+    blip_processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-large")
+    blip_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-large").to(0)
     transform = T.Compose([
         T.Resize(800),
         T.ToTensor(),
@@ -177,7 +180,7 @@ def main(args):
 
     # propagate through the model
     outputs = model(img)
-
+    print(open_vocabulary_classification_blip(im, blip_processor, blip_model, 0))
     # keep only predictions with 0.+ confidence
     probas = outputs['rel_logits'].softmax(-1)[0, :, :-1]
     probas_sub = outputs['sub_logits'].softmax(-1)[0, :, :-1]
