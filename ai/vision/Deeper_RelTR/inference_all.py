@@ -73,7 +73,10 @@ def class_post_processing(probas_sub, probas_obj, probas, keep_queries, sub_bbox
             explored_boxes[obj_tuple] = vg_obj
         else:
             vg_obj = processed_obj_class
-        print(vg_sub, REL_CLASSES[probas[idx].argmax()], vg_obj)
+
+        graph_triplet.append([vg_sub, REL_CLASSES[probas[idx].argmax()], vg_obj])
+        #print(vg_sub, REL_CLASSES[probas[idx].argmax()], vg_obj)
+    return graph_triplet
 
 
 def get_args_parser(img_path):
@@ -143,6 +146,7 @@ def get_args_parser(img_path):
 def vision_inference(args):
     blip_processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-large")
     blip_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-large").to(0)
+    caption = open_vocabulary_classification_blip(im, blip_processor, blip_model, 0)
     transform = T.Compose([
         T.Resize(800),
         T.ToTensor(),
@@ -180,7 +184,6 @@ def vision_inference(args):
 
     # propagate through the model
     outputs = model(img)
-    print(open_vocabulary_classification_blip(im, blip_processor, blip_model, 0))
     # keep only predictions with 0.+ confidence
     probas = outputs['rel_logits'].softmax(-1)[0, :, :-1]
     probas_sub = outputs['sub_logits'].softmax(-1)[0, :, :-1]
@@ -227,7 +230,7 @@ def vision_inference(args):
         h, w = conv_features['0'].tensors.shape[-2:]
         im_w, im_h = im.size
 
-        class_post_processing(probas_sub=probas_sub, probas_obj=probas_obj, probas=probas, keep_queries=keep_queries,
+        return caption, class_post_processing(probas_sub=probas_sub, probas_obj=probas_obj, probas=probas, keep_queries=keep_queries,
                               sub_bboxes_scaled=sub_bboxes_scaled, obj_bboxes_scaled=obj_bboxes_scaled, indices=indices, im=im)
         
 # if __name__ == '__main__':
