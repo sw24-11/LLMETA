@@ -76,13 +76,13 @@ def class_post_processing(probas_sub, probas_obj, probas, keep_queries, sub_bbox
         print(vg_sub, REL_CLASSES[probas[idx].argmax()], vg_obj)
 
 
-def get_args_parser():
+def get_args_parser(img_path):
     parser = argparse.ArgumentParser('Set transformer detector', add_help=False)
     parser.add_argument('--lr_backbone', default=1e-5, type=float)
     parser.add_argument('--dataset', default='vg')
 
     # image path
-    parser.add_argument('--img_path', type=str, default='demo/3.jpg',
+    parser.add_argument('--img_path', type=str, default= img_path,
                         help="Path of the test image")
 
     # * Backbone
