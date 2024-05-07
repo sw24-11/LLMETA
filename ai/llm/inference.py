@@ -18,29 +18,26 @@ def get_args_parser():
     parser.add_argument('--model_path', type=str, default='./models/llama-2-7b-chat.Q2_K.gguf',
                         help="Path of the test image")
 
-def writing_file_pattern():
-    with open('expr_pattern.txt', 'w', encoding='utf-8') as f:
-        for i in range(10):
-            llm = llama2_chain(model_paths[0], n_batch=n_batches[0], n_gpu_layers=n_gpu)
-            llm_chain, prompt = llm.llm_set()
-            response = llm_chain.invoke(prompt)
-            f.write(str(response))
-            print(i)
+# def writing_file_pattern():
+#     with open('expr_pattern.txt', 'w', encoding='utf-8') as f:
+#         for i in range(10):
+#             llm = llama2_chain(model_paths[0], n_batch=n_batches[0], n_gpu_layers=n_gpu)
+#             llm_chain, prompt = llm.llm_set()
+#             response = llm_chain.invoke(prompt)
+#             f.write(str(response))
+#             print(i)
 
 def extract_info(text):
-    # Regular expression patterns to capture title, authors, abstract, and research domain
     title_pattern = r"Title:\s*(.*?)\s*(?=\n|$)"
     authors_pattern = r"Authors:\s*(.*?)\s*(?=\n|$)"
     abstract_pattern = r"Abstract:\s*(.*?)\s*(?=\n|$)"
     domain_pattern = r"Research Domain:\s*(.*?)\s*(?=\n|$)"
     
-    # Search the text for each component using the regex
     title = re.search(title_pattern, text)
     authors = re.search(authors_pattern, text)
     abstract = re.search(abstract_pattern, text)
     domain = re.search(domain_pattern, text)
     
-    # Extract the matched text or use a default value if not found
     extracted_info = {
         "Title": title.group(1) if title else "Not provided",
         "Authors": authors.group(1) if authors else "Not provided",
@@ -52,10 +49,11 @@ def extract_info(text):
 
 class llama2_chain:
 
-    def __init__(self, model_path, n_gpu_layers, n_batch):
+    def __init__(self, model_path, n_gpu_layers, n_batch, input_paper):
         self.model_path=model_path
         self.n_gpu_layers=n_gpu_layers
         self.n_batch = n_batch
+        self.input_paper = input_paper
     
     def llm_set(self):
         metadata_extraction_template = """
@@ -83,33 +81,5 @@ class llama2_chain:
 
         llm_chain = LLMChain(prompt=prompt_template, llm=llm)
 
-        input_text = """
-        Autoencoders
-        Dor Bank, Noam Koenigstein, Raja Giryes
-        Abstract An autoencoder is a specific type of a neural network, which is mainly
-        designed to encode the input into a compressed and meaningful representation, and
-        then decode it back such that the reconstructed input is similar as possible to the
-        original one. This chapter surveys the different types of autoencoders that are mainly
-        used today. It also describes various applications and use-cases of autoencoders.
-        """
-
-        prompt = prompt_template.format(text=input_text)
+        prompt = prompt_template.format(text=self.input_paper)
         return llm_chain, prompt
-    
-
-model_paths = ["C:/Users/kbh/Code/project2/llm/models/llama-2-7b-chat.Q2_K.gguf",]
-            #    "C:/Users/kbh/Code/models/llama-2-13b-chat.Q3_K_M.gguf",
-            #    "C:/Users/kbh/Code/models/llama-2-13b-chat.Q4_K_M.gguf",
-            #    "C:/Users/kbh/Code/models/llama-2-13b-chat.Q5_K_M.gguf",
-            #    "C:/Users/kbh/Code/models/llama-2-13b-chat.Q8_0.gguf"]
-n_batches = [2000, 3000, 4000]
-n_gpu = 50
-
-llm = llama2_chain(model_paths[0], n_batch=n_batches[0], n_gpu_layers=n_gpu)
-llm_chain, prompt = llm.llm_set()
-response = llm_chain.invoke(prompt)
-info_dict = extract_info(response['text'])
-print(info_dict)
-
-
-    
