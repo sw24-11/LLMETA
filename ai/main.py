@@ -9,7 +9,7 @@ def text_inference(research_paper):
     n_batches = [2000, 3000, 4000]
     n_gpu = 50
 
-    llm = llama2_chain(model_paths[0], n_batch=n_batches[0], n_gpu_layers=n_gpu, input_paper=research_paper)
+    llm = llama2_chain(model_paths[0], n_batch=n_batches[0], n_gpu_layers=n_gpu, input_paper=research_paper, cb_manager=0)
     llm_chain, prompt = llm.llm_set()
     response = llm_chain.invoke(prompt)
     info_dict = extract_info(response['text'])

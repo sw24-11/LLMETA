@@ -49,11 +49,12 @@ def extract_info(text):
 
 class llama2_chain:
 
-    def __init__(self, model_path, n_gpu_layers, n_batch, input_paper):
+    def __init__(self, model_path, n_gpu_layers, n_batch, input_paper, cb_manager):
         self.model_path=model_path
         self.n_gpu_layers=n_gpu_layers
         self.n_batch = n_batch
         self.input_paper = input_paper
+        self.cb_manager = cb_manager
     
     def llm_set(self):
         metadata_extraction_template = """
@@ -65,16 +66,15 @@ class llama2_chain:
         """
 
         prompt_template = PromptTemplate(template=metadata_extraction_template, input_variables=["text"])
-
-        #callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
-        callback_manager = CallbackManager([])
+        callback_manager = [CallbackManager([StreamingStdOutCallbackHandler()]), CallbackManager([])]
+        
 
         llm = LlamaCpp(
             model_path=self.model_path,
             n_gpu_layers=self.n_gpu_layers,
             n_batch=self.n_batch,
             #temperature=0,  
-            callback_manager=callback_manager,
+            callback_manager=callback_manager[self.cb_manager],
             verbose=False,
             n_ctx=3000
         )
