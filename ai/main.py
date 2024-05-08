@@ -1,8 +1,8 @@
 import sys
 sys.path.append('./ai/vision/Deeper_RelTR/')
 
-from llm.inference import llama2_chain, extract_info
-from vision.Deeper_RelTR.inference_all import vision_inference, get_args_parser, argparse
+from llm.text_inference import llama2_chain, extract_info
+from vision.Deeper_RelTR.img_inference import vision_inference, get_args_parser, argparse
 
 def text_inference(research_paper):
     model_paths = ["C:/Users/kbh/Code/project2/llm/models/llama-2-7b-chat.Q2_K.gguf"]
@@ -22,7 +22,7 @@ def image_inference(img_path):
     args = parser.parse_args()
     caption, triplet_graph = vision_inference(args)
     print(caption)
-    
+
     return triplet_graph
 
 def main():
