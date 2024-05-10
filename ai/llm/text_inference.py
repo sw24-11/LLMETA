@@ -29,7 +29,7 @@ def get_args_parser():
 
 def extract_info(text):
     title_pattern = r"Title:\s*(.*?)\s*(?=\n|$)"
-    authors_pattern = r"Authors:\s*(.*?)\s*(?=\n|$)"
+    authors_pattern = r"Author(?:s)?(?:\(s\))?:\s*(.*?)\s*(?=\n|$)"  # Updated pattern
     abstract_pattern = r"Abstract:\s*(.*?)\s*(?=\n|$)"
     domain_pattern = r"Research Domain:\s*(.*?)\s*(?=\n|$)"
     
@@ -47,6 +47,7 @@ def extract_info(text):
     
     return extracted_info
 
+
 class llama2_chain:
 
     def __init__(self, model_path, n_gpu_layers, n_batch, input_paper, cb_manager):
@@ -58,7 +59,7 @@ class llama2_chain:
     
     def llm_set(self):
         metadata_extraction_template = """
-        Given the following Actual Text, extract the title, authors, abstract and research domain. 
+        Extract the title, authors, abstract and research domain from actual text. 
         and do not say anything else.
 
         Actual Text: {text}
@@ -67,8 +68,7 @@ class llama2_chain:
 
         prompt_template = PromptTemplate(template=metadata_extraction_template, input_variables=["text"])
         callback_manager = [CallbackManager([StreamingStdOutCallbackHandler()]), CallbackManager([])]
-        
-
+                
         llm = LlamaCpp(
             model_path=self.model_path,
             n_gpu_layers=self.n_gpu_layers,

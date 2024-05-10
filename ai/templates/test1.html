@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Metadata Analyzer</title>
+    <script>
+        async function submitForm(event) {
+            event.preventDefault();
+            const dataType = document.querySelector('input[name="data_type"]:checked').value;
+            const pdf = document.getElementById('pdf-input').files[0];
+            const image = document.getElementById('image-input').files[0];
+
+            if (dataType === 'text') {
+                const formData = new FormData();
+                formData.append('pdf', pdf);
+
+                const response = await fetch('/metadata/extraction', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                document.getElementById('result').innerText = JSON.stringify(result, null, 2);
+            } else if (dataType === 'image') {
+                const formData = new FormData();
+                formData.append('image', image);
+
+                const response = await fetch('/metadata/extraction-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                document.getElementById('result').innerText = JSON.stringify(result, null, 2);
+            }
+        }
+
+        function toggleInputFields() {
+            const dataType = document.querySelector('input[name="data_type"]:checked').value;
+            if (dataType === 'text') {
+                document.getElementById('pdf-div').style.display = 'block';
+                document.getElementById('image-div').style.display = 'none';
+            } else if (dataType === 'image') {
+                document.getElementById('pdf-div').style.display = 'none';
+                document.getElementById('image-div').style.display = 'block';
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Metadata Analyzer</h1>
+    <form id="metadata-form" onsubmit="submitForm(event)" enctype="multipart/form-data">
+        <label>
+            <input type="radio" name="data_type" value="text" checked onclick="toggleInputFields()"> PDF
+        </label>
+        <label>
+            <input type="radio" name="data_type" value="image" onclick="toggleInputFields()"> Image
+        </label>
+        <br><br>
+
+        <div id="pdf-div">
+            <label for="pdf-input">Upload your research paper (PDF):</label>
+            <input type="file" id="pdf-input" name="pdf">
+        </div>
+
+        <div id="image-div" style="display:none;">
+            <label for="image-input">Upload your research paper image:</label>
+            <input type="file" id="image-input" name="image">
+        </div>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Results:</h2>
+    <pre id="result"></pre>
+</body>
+</html>
