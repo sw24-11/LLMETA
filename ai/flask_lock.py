@@ -60,7 +60,7 @@ def image_inference(img_path):
     parser = argparse.ArgumentParser('RelTR inference', parents=[get_args_parser(img_path=img_path)])
     args = parser.parse_args()
     caption, triplet_graph = vision_inference(args)
-    return triplet_graph
+    return caption, triplet_graph
                                                 
 def extract_text_from_pdf(file_path):
     document = fitz.open(file_path)
@@ -113,9 +113,10 @@ def analyze_image():
             file.save(file_path)
 
             try:
-                metadata = image_inference(file_path)
+                caption, metadata = image_inference(file_path)
                 transformed_data = [' '.join(item) for item in metadata]
-                transformed_data = [{'key': i, 'value': item} for i, item in enumerate(transformed_data)]
+                transformed_data = [{'key': i+1, 'value': item} for i, item in enumerate(transformed_data)]
+                transformed_data.insert(0, {'key': 0, 'value': caption})
                 return jsonify({'image': transformed_data})
 
             finally:
