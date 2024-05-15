@@ -61,7 +61,7 @@ def image_inference(img_path):
     args = parser.parse_args()
     caption, triplet_graph = vision_inference(args)
     return triplet_graph
-
+                                                
 def extract_text_from_pdf(file_path):
     document = fitz.open(file_path)
     text = ''
@@ -89,7 +89,8 @@ def analyze_text():
             try:
                 text_content = extract_text_from_pdf(file_path)
                 metadata = text_inference(text_content)
-                return jsonify({'metadata': metadata})
+                merged_list = [{"key": key, "value": value} for key, value in metadata.items()]
+                return jsonify({'text': merged_list})
 
             finally:
                 os.remove(file_path)
@@ -113,7 +114,9 @@ def analyze_image():
 
             try:
                 metadata = image_inference(file_path)
-                return jsonify({'metadata': metadata})
+                transformed_data = [' '.join(item) for item in metadata]
+                transformed_data = [{'key': i, 'value': item} for i, item in enumerate(transformed_data)]
+                return jsonify({'image': transformed_data})
 
             finally:
                 os.remove(file_path)

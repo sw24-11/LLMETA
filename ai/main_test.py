@@ -256,9 +256,9 @@ doi:10.48550/arXiv.2207.11247.
             """
     img_path = './ai/vision/Deeper_RelTR/demo/3.jpg'
 
-    for _ in range(10):
-        print(text_inference(research_paper=research_paper))
-    #print(image_inference(img_path=img_path))
+    # for _ in range(10):
+    #     print(text_inference(research_paper=research_paper))
+    print(image_inference(img_path=img_path))
 
 if __name__=="__main__":
     main()
