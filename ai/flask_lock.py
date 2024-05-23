@@ -1,11 +1,13 @@
 from flask import Flask, request, jsonify, render_template
+from app import routes
 import os
 from werkzeug.utils import secure_filename
 import sys
 import fitz  # PyMuPDF
 from threading import Lock
 
-sys.path.append('./ai/vision/Deeper_RelTR/')
+sys.path.append('./vision/Deeper_RelTR/')
+#sys.path.append('.ai//vision/Deeper_RelTR/')
 
 from llm.text_inference import llama2_chain, extract_info
 from vision.Deeper_RelTR.img_inference import vision_inference, get_args_parser, argparse
