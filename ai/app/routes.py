@@ -6,6 +6,7 @@ import sys
 import fitz  # PyMuPDF
 from threading import Lock
 
+#sys.path.append('./ai/vision/Deeper_RelTR/')
 sys.path.append('./vision/Deeper_RelTR/')
 #sys.path.append('.ai//vision/Deeper_RelTR/')
 
@@ -74,14 +75,15 @@ def extract_text_from_pdf(file_path):
 def home():
     return render_template('test1.html')
 
-@app.route('/metadata/extraction', methods=['POST'])
+@app.route('/extraction-paper', methods=['GET'])
 def analyze_text():
-    if 'pdf' not in request.files:
+    if 'file' not in request.files:
         return jsonify({'error': 'No PDF file provided'}), 400
     if not process_lock.acquire(False):
         return jsonify({'error': 'Another request is being processed. Please wait.'}), 429
     try:
-        file = request.files['pdf']
+        file = request.files['file']
+        print(request.files)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -101,14 +103,15 @@ def analyze_text():
     finally:
         process_lock.release()
 
-@app.route('/metadata/extraction-image', methods=['POST'])
+@app.route('/extraction-image', methods=['GET'])
 def analyze_image():
-    if 'image' not in request.files:
+    if 'file' not in request.files:
         return jsonify({'error': 'No image file provided'}), 400
     if not process_lock.acquire(False):
         return jsonify({'error': 'Another request is being processed. Please wait.'}), 429
     try:
-        file = request.files['image']
+        file = request.files['file']
+        print(file)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)

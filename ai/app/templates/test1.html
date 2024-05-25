@@ -10,12 +10,12 @@
             const pdf = document.getElementById('pdf-input').files[0];
             const image = document.getElementById('image-input').files[0];
 
-            if (dataType === 'text') {
+            if (dataType === 'paper') {
                 const formData = new FormData();
                 formData.append('pdf', pdf);
 
                 const response = await fetch('/metadata/extraction', {
-                    method: 'POST',
+                    method: 'GET',
                     body: formData
                 });
                 const result = await response.json();
@@ -24,8 +24,8 @@
                 const formData = new FormData();
                 formData.append('image', image);
 
-                const response = await fetch('/metadata/extraction-image', {
-                    method: 'POST',
+                const response = await fetch('/metadata/extraction', {
+                    method: 'GET',
                     body: formData
                 });
                 const result = await response.json();
