@@ -75,7 +75,7 @@ def extract_text_from_pdf(file_path):
 def home():
     return render_template('test1.html')
 
-@app.route('/extraction-paper', methods=['GET'])
+@app.route('/extraction-paper', methods=['POST'])
 def analyze_text():
     if 'file' not in request.files:
         return jsonify({'error': 'No PDF file provided'}), 400
@@ -96,14 +96,15 @@ def analyze_text():
                 return jsonify({'text': merged_list})
 
             finally:
-                os.remove(file_path)
+                #os.remove(file_path)
+                None
     
         else:
             return jsonify({'error': 'Invalid file type or file not uploaded properly'}), 400
     finally:
         process_lock.release()
 
-@app.route('/extraction-image', methods=['GET'])
+@app.route('/extraction-image', methods=['POST'])
 def analyze_image():
     if 'file' not in request.files:
         return jsonify({'error': 'No image file provided'}), 400
@@ -126,7 +127,7 @@ def analyze_image():
 
             finally:
                 #os.remove(file_path)
-                print()
+                None
         else:
             return jsonify({'error': 'Invalid file type or file not uploaded properly'}), 400
     finally:

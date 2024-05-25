@@ -33,7 +33,7 @@ def NonCommon_processing_Resnet(x_min, y_min, x_max, y_max, image):
     
     _, predicted_class = outputs.max(1)
     predicted_class = predicted_class.item()
-
-    with open("second_classification/imagenet_classes.txt", "r") as f:
+    txt_path = "C:/Users/kbh/Code/project2/vision/LLMETA/ai/vision/Deeper_RelTR/second_classification/imagenet_classes.txt"
+    with open(txt_path, "r") as f:
         classes = [line.strip() for line in f.readlines()]
     return classes[predicted_class]
