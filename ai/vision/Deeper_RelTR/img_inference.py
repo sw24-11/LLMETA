@@ -121,7 +121,7 @@ def get_args_parser(img_path):
 
     parser.add_argument('--device', default='cuda',
                         help='device to use for training / testing')
-    parser.add_argument('--resume', default='C:/Users/kbh/Code/sgg/RelTR/checkpoint0149.pth', help='resume from checkpoint')
+    parser.add_argument('--resume', default="C:/Users/kbh/Code/pths/checkpoint0149.pth", help='resume from checkpoint')
     parser.add_argument('--set_cost_class', default=1, type=float,
                         help="Class coefficient in the matching cost")
     parser.add_argument('--set_cost_bbox', default=5, type=float,
