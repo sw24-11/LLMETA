@@ -120,10 +120,11 @@ def analyze_image():
 
             try:
                 caption, metadata = image_inference(file_path)
+                print("image extraction done!")
                 transformed_data = [' '.join(item) for item in metadata]
                 transformed_data = [{'key': i+1, 'value': item} for i, item in enumerate(transformed_data)]
                 transformed_data.insert(0, {'key': 0, 'value': caption})
-                return jsonify({'image': transformed_data})
+                return jsonify({'text': transformed_data})
 
             finally:
                 #os.remove(file_path)
