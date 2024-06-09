@@ -77,14 +77,13 @@ def home():
 
 @app.route('/extraction-paper', methods=['POST'])
 def analyze_text():
-    
+
     if 'file' not in request.files:
         return jsonify({'error': 'No PDF file provided'}), 400
     if not process_lock.acquire(False):
         return jsonify({'error': 'Another request is being processed. Please wait.'}), 429
     try:
         file = request.files['file']
-        print(request.files)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
