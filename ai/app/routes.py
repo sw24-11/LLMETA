@@ -77,6 +77,7 @@ def home():
 
 @app.route('/extraction-paper', methods=['POST'])
 def analyze_text():
+    
     if 'file' not in request.files:
         return jsonify({'error': 'No PDF file provided'}), 400
     if not process_lock.acquire(False):
