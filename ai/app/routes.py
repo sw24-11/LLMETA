@@ -74,7 +74,7 @@ def extract_text_from_pdf(file_path):
 def home():
     return render_template('test1.html')
 
-@app.route('/metadata/extraction', methods=['POST'])
+@app.route('/metadata/extraction-paper', methods=['POST'])
 def analyze_text():
     if 'pdf' not in request.files:
         return jsonify({'error': 'No PDF file provided'}), 400
